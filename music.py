@@ -57,6 +57,16 @@ class Notes:
             l.append(note.get_str(print_octave=print_octave))
         return ' '.join(l)
 
+    def __contains__(self, note):
+        '''
+        Checks if a note is in this set of notes
+        '''
+        note_names = [n.note_name for n in self.notes]
+        if note.note_name in note_names:
+            return True
+        else:
+            return False
+
 class Chord(Notes):
 
     chord_interval_map = {
@@ -96,14 +106,48 @@ class Chord(Notes):
     def __str__(self):
         return self.get_str()
 
-'''
-0 || 1  | 2  | 3  |
-E ||-F--|-F#-|-G--|
-B ||-C--|-C#-|-D--|
-G ||-G#-|-A--|-A#-|
-D ||-D#-|-E--|-E#-|
-A ||-A#-|-B--|-C--|
-E ||-F--|-F#-|-G--|
-'''
 class Fretboard:
-    pass
+
+    def __init__(self, tuning=['E3', 'A3', 'D4', 'G4', 'B4', 'E5'], max_fret=22):
+        strings = []
+        for open_string in tuning:
+            note_name = open_string[0]
+            octave = int(open_string[1])
+            open_string_note = Note(note_name, octave=octave)
+            string = []
+            for halftone in range(max_fret + 1):
+                string.append(open_string_note.shift(halftone=halftone))
+            strings.append(string)
+        self.strings = strings
+
+    def display(self, highlight_notes=None, filler='---'):
+
+        def str_format(note_name, filler):
+            return f'{filler}{note_name:<2}{filler}'.replace(' ', filler[0])
+
+        def fret0_format(note_name):
+            return f'{note_name:<2}||'
+
+
+        frets_str = [str_format(i, filler=filler) for i in range(1, len(self.strings[0]))]
+        fret_label = fret0_format('0') + '|'.join(frets_str)
+
+        strings_str = [fret_label]
+        divider = '='*((3 + 2*len(filler))*(len(self.strings[0]) - 1) + 3)
+        strings_str.append(divider)
+        for string in self.strings[::-1]:
+            l = []
+            for fret in range(1, len(string)):
+                note = string[fret]
+                if highlight_notes is None or note in highlight_notes:
+                    l.append(str_format(note.note_name, filler=filler))
+                else:
+                    l.append(str_format('-', filler=filler))
+            open_string_note = string[0]
+            string_str = fret0_format(open_string_note.note_name) + '|'.join(l)
+            strings_str.append(string_str)
+        strings_str.append(divider)
+        strings_str.append(fret_label)
+
+        display_str = '\n'.join(strings_str)
+        print(display_str)

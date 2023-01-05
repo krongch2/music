@@ -17,5 +17,10 @@ def test_interval():
 def test_chord():
     print(music.Chord('AM7'))
 
+def test_fretboard():
+    f = music.Fretboard()
+    f.display()
+    f.display(highlight_notes=music.Chord('Dm'))
+
 if __name__ == '__main__':
-    test_chord()
+    test_fretboard()
