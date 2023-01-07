@@ -15,12 +15,17 @@ def test_interval():
     print(n.interval('P5').get_str())
 
 def test_chord():
-    print(music.Chord('AM7'))
+    print(music.Chord('C7'))
+
+def test_scale():
+    print(music.Scale('A', 'major'))
+    print(music.Scale('A', 'minor'))
 
 def test_fretboard():
     f = music.Fretboard()
     f.display()
-    f.display(highlight_notes=music.Chord('Dm'))
+    f.display(highlight_notes=music.Chord('A'))
+    f.display(highlight_notes=music.Scale('A'))
 
 if __name__ == '__main__':
     test_fretboard()

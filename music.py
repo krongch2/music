@@ -57,6 +57,9 @@ class Notes:
             l.append(note.get_str(print_octave=print_octave))
         return ' '.join(l)
 
+    def __str__(self):
+        return self.get_str()
+
     def __contains__(self, note):
         '''
         Checks if a note is in this set of notes
@@ -66,6 +69,13 @@ class Notes:
             return True
         else:
             return False
+
+    def from_intervals(root_name, interval_names, octave=4):
+        note_root = Note(root_name, octave=octave)
+        notes = []
+        for interval_name in interval_names:
+            notes.append(note_root.interval(interval_name))
+        return notes
 
 class Chord(Notes):
 
@@ -83,7 +93,7 @@ class Chord(Notes):
         '7': ['P1', 'M3', 'P5', 'm7'],
         'dim7': ['P1', 'm3', 'd5', 'd7'],
         'aug7': ['P1', 'M3', 'A5', 'm7']
-        }
+    }
 
     def from_symbol(symbol):
         match = re.search('(\w#*)(m|M|dim|aug)*(\d*)', symbol)
@@ -94,17 +104,29 @@ class Chord(Notes):
         return root, chord_name
 
     def __init__(self, symbol, octave=4):
-        root, chord_name = Chord.from_symbol(symbol)
-        self.root = Note(root, octave=octave)
-        notes = []
+        root_name, chord_name = Chord.from_symbol(symbol)
+        self.root = Note(root_name, octave=octave)
+        self.chord_name = chord_name
         interval_names = Chord.chord_interval_map[chord_name]
-        for interval_name in interval_names:
-            notes.append(self.root.interval(interval_name))
-
+        notes = Notes.from_intervals(root_name, interval_names, octave=octave)
         super().__init__(notes)
 
-    def __str__(self):
-        return self.get_str()
+class Scale(Notes):
+
+    scale_interval_map = {
+        'major': ['P1', 'M2', 'M3', 'P4', 'P5', 'M6', 'M7'],
+        'minor': ['P1', 'M2', 'm3', 'P4', 'P5', 'm6', 'm7'],
+        'harmonic_minor': ['P1', 'M2', 'm3', 'P4', 'P5', 'm6', 'M7'],
+        'major_pentatonic': ['P1', 'M2', 'M3', 'P5', 'P6'],
+        'minor_pentatonic': ['P1', 'm3', 'P4', 'P5', 'm7'],
+    }
+
+    def __init__(self, root_name, scale_name='major', octave=4):
+        self.root = Note(root_name, octave=octave)
+        self.scale_name = scale_name
+        interval_names = Scale.scale_interval_map[scale_name]
+        notes = Notes.from_intervals(root_name, interval_names, octave=octave)
+        super().__init__(notes)
 
 class Fretboard:
 
