@@ -196,14 +196,17 @@ class Fretboard:
             self.display()
 
         while True:
-            answer = input(f'Type in the fret number of {note_name} in the string order of {string_numbers}, separated by a space: ')
+            answer = input(f'Type in the fret numbers of {note_name} in the string order of {string_numbers}, separated by a space: ')
             submitted_frets = [int(fret) for fret in answer.split()]
             submitted_note_names = [self.get_note_name(string_number, submitted_fret) for submitted_fret, string_number in zip(submitted_frets, string_numbers)]
             print('Your submitted answer: ', submitted_note_names)
             result = all(submitted_note_name == note_name for submitted_note_name in submitted_note_names)
             if result:
                 self.display(highlight_notes=Notes([note_name]))
+                print('CORRECT!')
                 break
+            else:
+                print('WRONG!')
 
     def exercise_2(self, natural_only=True, display_notes=False, string_numbers=[6, 5, 4, 3, 2, 1]):
         if natural_only:
