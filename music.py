@@ -1,4 +1,5 @@
 import re
+import numpy as np
 
 class Note:
 
@@ -46,10 +47,25 @@ class Note:
             s += f'{self.octave}'
         return s
 
+    def is_natural(note_name):
+        if ('#' in note_name) or ('b' in note_name):
+            return False
+        else:
+            return True
+
 class Notes:
 
-    def __init__(self, notes):
-        self.notes = notes
+    def __init__(self, input_notes):
+        '''
+        `notes` is a list of Note objects or strings of note_names
+        '''
+        curr_notes = []
+        for input_note in input_notes:
+            if isinstance(input_note, str):
+                curr_notes.append(Note(input_note))
+            else:
+                curr_notes.append(input_note)
+        self.notes = curr_notes
 
     def get_str(self, print_octave=False):
         l = []
@@ -142,14 +158,13 @@ class Fretboard:
             strings.append(string)
         self.strings = strings
 
-    def display(self, highlight_notes=None, filler='---'):
+    def display(self, highlight_notes=None, hightlight_frets=None, filler='---'):
 
         def str_format(note_name, filler):
             return f'{filler}{note_name:<2}{filler}'.replace(' ', filler[0])
 
         def fret0_format(note_name):
             return f'{note_name:<2}||'
-
 
         frets_str = [str_format(i, filler=filler) for i in range(1, len(self.strings[0]))]
         fret_label = fret0_format('0') + '|'.join(frets_str)
@@ -170,6 +185,32 @@ class Fretboard:
             strings_str.append(string_str)
         strings_str.append(divider)
         strings_str.append(fret_label)
-
         display_str = '\n'.join(strings_str)
         print(display_str)
+
+    def get_note_name(self, string_number, fret):
+        return self.strings[::-1][string_number - 1][fret].note_name
+
+    def exercise_1(self, note_name='A', display_notes=False, string_numbers=[6, 5, 4, 3, 2, 1]):
+        if display_notes:
+            self.display()
+
+        while True:
+            answer = input(f'Type in the fret number of {note_name} in the string order of {string_numbers}, separated by a space: ')
+            submitted_frets = [int(fret) for fret in answer.split()]
+            submitted_note_names = [self.get_note_name(string_number, submitted_fret) for submitted_fret, string_number in zip(submitted_frets, string_numbers)]
+            print('Your submitted answer: ', submitted_note_names)
+            result = all(submitted_note_name == note_name for submitted_note_name in submitted_note_names)
+            if result:
+                self.display(highlight_notes=Notes([note_name]))
+                break
+
+    def exercise_2(self, natural_only=True, display_notes=False, string_numbers=[6, 5, 4, 3, 2, 1]):
+        if natural_only:
+            note_pool = [note_name for note_name in Note.notes if Note.is_natural(note_name)]
+        else:
+            note_pool = Note.notes
+
+        while True:
+            note_name = np.random.choice(note_pool, size=1)[0]
+            self.exercise_1(note_name=note_name)
